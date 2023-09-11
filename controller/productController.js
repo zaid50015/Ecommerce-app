@@ -12,10 +12,12 @@ exports.fetchAllProducts = catchAsyncError(async (req, res) => {
   // filter = {"category":["smartphone","laptops"]}
   // sort = {_sort:"price",_order="desc"}
   // pagination = {_page:1,_limit=10}
-
-  let products = Product.find();
-
-  let totalProducts = Product.find({});
+ let conditon={};
+ if(!req.query.admin){
+ conditon.deleted={$ne:true};
+ }
+  let products = Product.find(conditon);
+  let totalProducts = Product.find(conditon);
   if (req.query.category) {
     products = products.find({ category: req.query.category });
     totalProducts = totalProducts.find({ category: req.query.category });
