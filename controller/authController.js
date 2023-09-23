@@ -1,25 +1,23 @@
 const catchAsyncError = require("../middleware/catchAsyncError");
 const { User } = require("../model/User");
-
-exports.createUser= catchAsyncError(async(req,res)=>{
-    const user=await User.create(req.body);
-    res.status(201).json({id:user.id,role:user.role});
-})
-exports.loginUser=catchAsyncError(async(req,res)=>{
-    const { email, password } = req.body;
-    if (!email || !password) {
-        return res.status(400).json({message:"Invalid credentails "})
-      }
-
-        const user=await User.findOne({email}).select("+password").exec();
-      if (!user) {
-        return  res.status(400).json({message:"User not found"})
-      }
-      const isPasswordMatched = await user.comparePassword(password);
-      if (!isPasswordMatched) {
-        return res.status(400).json({message:"Invalid email or password"});
-      }
-           
-       return res.status(200).json({id:user.id,role:user.role});
-
-})
+const { sanitizeUser } = require("../services/common");
+const jwt = require('jsonwebtoken');
+exports.createUser = catchAsyncError(async (req, res) => {
+  // if(await User.findOne({email:req.body.email})){
+  //   res.status(401).json({message:"User with this email already exists"})
+  // }
+  const user = await User.create(req.body);  
+  req.login(sanitizeUser(user), function (err) {  //this also calls serializer and adds to session
+    if (err) {
+      return res.status(400).json(err);
+    }
+    const token = jwt.sign({ foo: sanitizeUser(user) }, process.env.JWT_SECRET);
+    res.status(201).json(sanitizeUser(user));
+  });
+});
+exports.loginUser = async (req, res) => {
+  res.status(201).json(req.user);
+};
+exports.CheckUser = async (req, res) => {
+  res.status(201).json(req.user);
+};
