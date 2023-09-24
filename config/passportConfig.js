@@ -1,12 +1,12 @@
 const { User } = require("../model/User");
-const { sanitizeUser } = require("../services/common");
+const { sanitizeUser, cookieExtractor } = require("../services/common");
 const LocalStrategy = require("passport-local").Strategy;
 const jwt = require("jsonwebtoken");
 const JwtStrategy = require("passport-jwt").Strategy;
 const ExtractJwt = require("passport-jwt").ExtractJwt;
 
 var opts = {};
-opts.jwtFromRequest = ExtractJwt.fromAuthHeaderAsBearerToken();
+opts.jwtFromRequest = cookieExtractor;
 opts.secretOrKey = process.env.JWT_SECRET;
 
 exports.intilizingPassport = (passport) => {
@@ -33,7 +33,7 @@ exports.intilizingPassport = (passport) => {
             { foo: sanitizeUser(user) },
             process.env.JWT_SECRET
           );
-            done(null, { id: user.id, role: user.role });  //this calls a serializer
+            done(null, { id: user.id, role: user.role,token });  //this calls a serializer
         }
       } catch (error) {
         done(error);
@@ -45,9 +45,8 @@ exports.intilizingPassport = (passport) => {
   //JWT Statregy
   passport.use(
     new JwtStrategy(opts, async function (jwt_payload, done) {
-
       try {
-        const user = await User.findOne({ id: jwt_payload.sub });
+        const user = await User.findById(jwt_payload.foo.id );
         if (user) {
           return done(null, sanitizeUser(user));
         } else {
@@ -62,7 +61,6 @@ exports.intilizingPassport = (passport) => {
 
   passport.serializeUser(function (user, cb) {
     process.nextTick(function () {
-     console.log(user)
       return cb(null, { id: user.id, role: user.role })
     });
   });

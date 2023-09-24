@@ -2,7 +2,7 @@ const catchAsyncError = require("../middleware/catchAsyncError");
 const { User } = require("../model/User");
 
 exports.fetchUserById=catchAsyncError(async(req,res)=>{
-    const {id}=req.params
+    const {id}=req.user
     const user=await User.findById(id);
     res.status(200).json(user)
 })

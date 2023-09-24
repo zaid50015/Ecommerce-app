@@ -2,6 +2,7 @@ const express = require("express");
 const app = express();
 const passport = require('passport');
 const cors = require("cors");
+const cookieParser = require('cookie-parser')
 const productsRoute = require("./routes/productRoute");
 const categoriesRoute = require("./routes/categoryRoute");
 const brandsRoute = require("./routes/brandRoute");
@@ -15,26 +16,20 @@ const { intilizingPassport } = require("./config/passportConfig");
 const { isAuth } = require("./services/common");
 
 
-intilizingPassport(passport);
 
-
-
+//Middlewares
+app.use(cookieParser())
 app.use(express.json());
-
-
+app.use(express.static('build'))
 app.use(require('express-session')({ secret: process.env.SESSION_SECRET, resave: true, saveUninitialized: true }));
 app.use(passport.initialize());
 app.use(passport.session())
-
-
-//Middlewares
-
 app.use(
   cors({
     exposedHeaders: ["X-Total-Count"],
   })
 );
-
+intilizingPassport(passport);
 
 
 app.use("/products", isAuth(),productsRoute);

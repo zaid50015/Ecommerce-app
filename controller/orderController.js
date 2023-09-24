@@ -10,8 +10,8 @@ exports.createOrder=catchAsyncError(async(req,res)=>{
 
 
 exports.fetchOrdertByUser=catchAsyncError(async(req,res)=>{
-    const{userId}=req.params;
-    const order=await Order.find({user:userId})
+    const{id}=req.user;
+    const order=await Order.find({user:id})
     res.status(200).json(order);
 })
 
