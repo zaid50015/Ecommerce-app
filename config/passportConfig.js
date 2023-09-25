@@ -33,7 +33,7 @@ exports.intilizingPassport = (passport) => {
             { foo: sanitizeUser(user) },
             process.env.JWT_SECRET
           );
-            done(null, { id: user.id, role: user.role,token });  //this calls a serializer
+            done(null, { id: user.id, role: user.role});  //this calls a serializer
         }
       } catch (error) {
         done(error);

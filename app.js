@@ -20,7 +20,7 @@ const { isAuth } = require("./services/common");
 //Middlewares
 app.use(cookieParser())
 app.use(express.json());
-app.use(express.static('build'))
+// app.use(express.static('build'))
 app.use(require('express-session')({ secret: process.env.SESSION_SECRET, resave: true, saveUninitialized: true }));
 app.use(passport.initialize());
 app.use(passport.session())

@@ -3,9 +3,9 @@ const { User } = require("../model/User");
 const { sanitizeUser } = require("../services/common");
 const jwt = require("jsonwebtoken");
 exports.createUser = catchAsyncError(async (req, res) => {
-  // if(await User.findOne({email:req.body.email})){
-  //   res.status(401).json({message:"User with this email already exists"})
-  // }
+  if(await User.findOne({email:req.body.email})){
+    return res.status(401).json({message:"User with this email already exists"})
+  }
   const user = await User.create(req.body);
   req.login(sanitizeUser(user), function (err) {
     //this also calls serializer and adds to session
@@ -29,6 +29,12 @@ exports.loginUser = async (req, res) => {
   })
   .json(req.user);
 };
-exports.CheckUser = async (req, res) => {
-  res.status(201).json(req.user);
+exports.checkAuth = async (req, res) => {
+  console.log("call ja rahi hai")
+  if(req.user){
+    res.status(200).json(req.user);
+  }
+  else{
+    res.sendStatus(401);
+  }
 };
