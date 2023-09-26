@@ -10,14 +10,39 @@ const userRoute = require("./routes/userRoutes");
 const authRoute = require("./routes/authRoute");
 const cartRoute = require("./routes/cartRoute");
 const orderRoute = require("./routes/orderRoute");
-
-
 const { intilizingPassport } = require("./config/passportConfig");
 const { isAuth } = require("./services/common");
 
+const endpointSecret = process.env.END_POINT_SECRET;
+
+app.post('/webhook', express.raw({type: 'application/json'}), (request, response) => {
+  const sig = request.headers['stripe-signature'];
+
+  let event;
+
+  try {
+    event = stripe.webhooks.constructEvent(request.body, sig, endpointSecret);
+  } catch (err) {
+    response.status(400).send(`Webhook Error: ${err.message}`);
+    return;
+  }
+
+  // Handle the event
+  switch (event.type) {
+    case 'payment_intent.succeeded':
+      const paymentIntentSucceeded = event.data.object;
+      // Then define and call a function to handle the event payment_intent.succeeded
+      break;
+    // ... handle other event types
+    default:
+      console.log(`Unhandled event type ${event.type}`);
+  }
+  response.send();
+});
 
 
 //Middlewares
+
 app.use(cookieParser())
 app.use(express.json());
 // app.use(express.static('build'))
@@ -46,12 +71,6 @@ app.use("/orders",isAuth(), orderRoute);
 // This is your test secret API key.
 
 const stripe = require("stripe")(process.env.STRIPE_API_KEY);
-
-app.use(express.static("public"));
-app.use(express.json());
-
-
-
 app.post("/create-payment-intent", async (req, res) => {
   const { totalAmount } = req.body;
 console.log(totalAmount)
@@ -70,6 +89,8 @@ console.log(totalAmount)
   });
 });
 
+//WEB HOOK
+//TODO : CAPTURE ACTUAL ORDER
 
 
 
