@@ -41,6 +41,36 @@ app.use("/cart", isAuth(),cartRoute);
 app.use("/orders",isAuth(), orderRoute);
 
 
+// Payments
+
+// This is your test secret API key.
+
+const stripe = require("stripe")(process.env.STRIPE_API_KEY);
+
+app.use(express.static("public"));
+app.use(express.json());
+
+
+
+app.post("/create-payment-intent", async (req, res) => {
+  const { totalAmount } = req.body;
+console.log(totalAmount)
+  // Create a PaymentIntent with the order amount and currency
+  const paymentIntent = await stripe.paymentIntents.create({
+    amount:totalAmount*100, //for decimal  
+    currency: "inr",
+    // In the latest version of the API, specifying the `automatic_payment_methods` parameter is optional because Stripe enables its functionality by default.
+    automatic_payment_methods: {
+      enabled: true,
+    },
+  });
+
+  res.send({
+    clientSecret: paymentIntent.client_secret,
+  });
+});
+
+
 
 
 

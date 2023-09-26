@@ -30,7 +30,6 @@ exports.loginUser = async (req, res) => {
   .json(req.user);
 };
 exports.checkAuth = async (req, res) => {
-  console.log("call ja rahi hai")
   if(req.user){
     res.status(200).json(req.user);
   }
