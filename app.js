@@ -12,7 +12,7 @@ const cartRoute = require("./routes/cartRoute");
 const orderRoute = require("./routes/orderRoute");
 const { intilizingPassport } = require("./config/passportConfig");
 const { isAuth } = require("./services/common");
-
+const path=require('path')
 const endpointSecret = process.env.END_POINT_SECRET;
 
 app.post('/webhook', express.raw({type: 'application/json'}), (request, response) => {
@@ -45,7 +45,7 @@ app.post('/webhook', express.raw({type: 'application/json'}), (request, response
 
 app.use(cookieParser())
 app.use(express.json());
-// app.use(express.static('build'))
+app.use(express.static(path.resolve(__dirname,'build')));
 app.use(require('express-session')({ secret: process.env.SESSION_SECRET, resave: true, saveUninitialized: true }));
 app.use(passport.initialize());
 app.use(passport.session())

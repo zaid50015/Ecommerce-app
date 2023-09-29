@@ -30,10 +30,10 @@ exports.intilizingPassport = (passport) => {
           done(null, false, { message: "Invalid Credentails" });
         } else {
           const token = jwt.sign(
-            { foo: sanitizeUser(user) },
+             sanitizeUser(user) ,
             process.env.JWT_SECRET
           );
-            done(null, { id: user.id, role: user.role});  //this calls a serializer
+            done(null, { id: user.id, role: user.role,token});  //this calls a serializer
         }
       } catch (error) {
         done(error);
@@ -45,8 +45,9 @@ exports.intilizingPassport = (passport) => {
   //JWT Statregy
   passport.use(
     new JwtStrategy(opts, async function (jwt_payload, done) {
+      console.log({ jwt_payload });
       try {
-        const user = await User.findById(jwt_payload.foo.id );
+        const user = await User.findById(jwt_payload.id );
         if (user) {
           return done(null, sanitizeUser(user));
         } else {

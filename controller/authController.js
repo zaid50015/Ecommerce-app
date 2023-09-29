@@ -12,7 +12,7 @@ exports.createUser = catchAsyncError(async (req, res) => {
     if (err) {
       return res.status(400).json(err);
     }
-    const token = jwt.sign({ foo: sanitizeUser(user) }, process.env.JWT_SECRET);
+    const token = jwt.sign( sanitizeUser(user) , process.env.JWT_SECRET);
     res
       .cookie("jwt", token, {
         expires: new Date(Date.now() + 3600000),
@@ -22,12 +22,13 @@ exports.createUser = catchAsyncError(async (req, res) => {
   });
 });
 exports.loginUser = async (req, res) => {
+  const user = req.user
   res
-  .cookie("jwt", req.user.token, {
+  .cookie("jwt", user.token, {
     expires: new Date(Date.now() + 3600000),
     httpOnly: true,
   })
-  .json(req.user);
+  .json({id:user.id,role:user.role});
 };
 exports.checkAuth = async (req, res) => {
   if(req.user){
