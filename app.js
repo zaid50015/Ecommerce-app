@@ -65,7 +65,10 @@ app.use("/users",isAuth(), userRoute);
 app.use("/auth", authRoute);
 app.use("/cart", isAuth(),cartRoute);
 app.use("/orders",isAuth(), orderRoute);
-
+// this line we add to make react router work in case of other routes doesnt match
+app.get('*', (req, res) =>
+  res.sendFile(path.resolve('build', 'index.html'))
+);
 
 // Payments
 
