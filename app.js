@@ -12,10 +12,11 @@ const cartRoute = require("./routes/cartRoute");
 const orderRoute = require("./routes/orderRoute");
 const { intilizingPassport } = require("./config/passportConfig");
 const { isAuth } = require("./services/common");
-const path=require('path')
+const path=require('path');
+const { Order } = require("./model/Order");
 const endpointSecret = process.env.END_POINT_SECRET;
 
-app.post('/webhook', express.raw({type: 'application/json'}), (request, response) => {
+app.post('/webhook', express.raw({type: 'application/json'}), async(request, response) => {
   const sig = request.headers['stripe-signature'];
 
   let event;
@@ -31,7 +32,9 @@ app.post('/webhook', express.raw({type: 'application/json'}), (request, response
   switch (event.type) {
     case 'payment_intent.succeeded':
       const paymentIntentSucceeded = event.data.object;
-      console.log({paymentIntentSucceeded})
+      const order = await Order.findById(paymentIntentSucceeded.metadata.orderId);
+      order.paymentStatus = 'received';
+      await order.save()
       // Then define and call a function to handle the event payment_intent.succeeded
       break;
     // ... handle other event types

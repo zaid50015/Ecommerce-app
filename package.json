@@ -3,6 +3,8 @@
   "version": "1.0.0",
   "description": "Backend for e-commerce app",
   "main": "server.js",
+  "proxy":"http://localhost:8080",
+  "private":true,
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "start": "node server.js",
