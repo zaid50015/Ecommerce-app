@@ -4,6 +4,7 @@ const { Product } = require("../model/Product");
 //save bypasss the schema validation so not be using it
 exports.createProduct = catchAsyncError(async (req, res) => {
   const product = new Product(req.body);
+  product.discountPrice = Math.round(product.price*(1-product.discountPercentage/100))
   const doc = await product.save();
   res.status(201).json(doc);
 });
@@ -19,12 +20,12 @@ exports.fetchAllProducts = catchAsyncError(async (req, res) => {
   let products = Product.find(conditon);
   let totalProducts = Product.find(conditon);
   if (req.query.category) {
-    products = products.find({ category: req.query.category });
-    totalProducts = totalProducts.find({ category: req.query.category });
+    products = products.find({ category: {$in:req.query.category.split(',')} });
+    totalProducts = totalProducts.find({ category: {$in:req.query.category.split(',')} });
   }
   if (req.query.brand) {
-    products = products.find({ brand: req.query.brand });
-    totalProducts = totalProducts.find({ brand: req.query.brand });
+    products = products.find({ brand: {$in:req.query.brand.split(',')} });
+    totalProducts = totalProducts.find({ brand:{$in:req.query.brand.split(',')} });
   }
 
   if (req.query._sort && req.query._order) {
@@ -56,6 +57,8 @@ exports.findProductById=catchAsyncError(async(req,res)=>{
 
 exports.updateProduct=catchAsyncError(async(req,res)=>{
   const {id}=req.params;
-  const updatedProduct=await Product.findByIdAndUpdate(id,req.body,{new:true});
+  const product=await Product.findByIdAndUpdate(id,req.body,{new:true});
+  product.discountPrice = Math.round(product.price*(1-product.discountPercentage/100))
+  const updatedProduct = await product.save()
   res.status(200).json(updatedProduct)
 })

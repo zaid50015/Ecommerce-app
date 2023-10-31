@@ -2,6 +2,8 @@ const catchAsyncError = require("../middleware/catchAsyncError");
 const { User } = require("../model/User");
 const { sanitizeUser } = require("../services/common");
 const jwt = require("jsonwebtoken");
+const crypto = require('crypto');
+const sendEmail = require("../services/sendEmail");
 exports.createUser = catchAsyncError(async (req, res) => {
   if(await User.findOne({email:req.body.email})){
     return res.status(401).json({message:"User with this email already exists"})
@@ -38,3 +40,50 @@ exports.checkAuth = async (req, res) => {
     res.sendStatus(401);
   }
 };
+
+exports.logOutUser = async (req, res) => {
+  const user = req.user
+  res
+  .cookie("jwt", null, {
+    expires: new Date(Date.now()),
+    httpOnly: true,
+  })
+  .sendStatus(200);
+};
+
+exports.resetPasswordRequest=catchAsyncError(async(req,res)=>{
+  const email=req.body.email;
+  const user=await User.findOne({email:email})
+  if(user){
+    const token = crypto.randomBytes(48).toString('hex');
+    user.resetPasswordToken=token;
+    await user.save()
+    const subject="Zapkart Reset Password Link";
+    // const resetPasswordLink=`http://localhost:3000/reset-password?token=${token}&email=${email}`;
+    const resetPasswordLink=`https://ecommerce-app-kohl-eta.vercel.app/reset-password?token=${token}&email=${email}`;
+    const html=`<p>Click <a href='${resetPasswordLink}'>here</a> to reset your password</p>`;
+    const info=await sendEmail({to:email,subject,html});
+    res.json(info);
+  }
+  else{
+    res.sendStatus(401)
+  }
+})
+
+exports.resetPassword=catchAsyncError(async(req,res)=>{
+  const {email,token,password}=req.body;
+  const user=await User.findOne({email:email,resetPasswordToken:token}).select("+password")
+  if(user){
+    user.resetPasswordToken="",
+    user.password=password
+    await user.save()
+    const subject="Password Updated Successfully";
+    const html=`<p>Your Password has been updated</p>`;
+    const info=await sendEmail({to:email,subject,html});
+    res.json(info);
+  }
+  else{
+    res.sendStatus(401)
+  }
+})
+

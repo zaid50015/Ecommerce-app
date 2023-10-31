@@ -25,18 +25,24 @@ const productSchema = new Schema({
   category: { type: String, required: true },
   thumbnail: { type: String, required: true },
   images: { type: [String], required: true },
+  discountPrice: { type: Number},
+  highlights:{ type : [String] },
   deleted: { type: Boolean, default: false },
-});
+},{timestamps:true});
+
+
 
 productSchema.virtual("id").get(function () {
   return this._id;
 });
 
-productSchema.set('toJSON',{
-    virtuals: true,
-    versionKey: false,
-    transform: function (doc,ret) { delete ret._id}
-})
+productSchema.set("toJSON", {
+  virtuals: true,
+  versionKey: false,
+  transform: function (doc, ret) {
+    delete ret._id;
+  },
+});
 exports.Product = mongoose.model("Product", productSchema);
 
 // virtuals: true - This means that any virtual properties defined on the schema will be included in the JSON output.

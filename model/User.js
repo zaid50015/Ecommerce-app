@@ -1,16 +1,16 @@
-const mongoose = require('mongoose');
+const mongoose = require("mongoose");
 const { Schema } = mongoose;
 const bcrypt = require("bcryptjs");
 const userSchema = new Schema({
-  email: { type: String, required: true, unique: true,  },
-  password: { type: String, required: true , select: false,},
-  role: { type: String, required: true, default:'user' },
-  addresses: { type: [Schema.Types.Mixed] }, 
+  email: { type: String, required: true, unique: true },
+  password: { type: String, required: true, select: false },
+  role: { type: String, required: true, default: "user" },
+  addresses: { type: [Schema.Types.Mixed] },
   // TODO:  We can make a separate Schema for this
   name: { type: String },
-  orders: { type: [Schema.Types.Mixed] }
-});
-
+  orders: { type: [Schema.Types.Mixed] },
+  resetPasswordToken: { type: String, default: "" },
+},{timestamps:true});
 
 userSchema.pre("save", async function (next) {
   if (!this.isModified("password")) {
@@ -24,12 +24,11 @@ userSchema.methods.comparePassword = async function (password) {
   return await bcrypt.compare(password, this.password);
 };
 
-
-const virtual = userSchema.virtual('id');
+const virtual = userSchema.virtual("id");
 virtual.get(function () {
   return this._id;
 });
-userSchema.set('toJSON', {
+userSchema.set("toJSON", {
   virtuals: true,
   versionKey: false,
   transform: function (doc, ret) {
@@ -37,5 +36,4 @@ userSchema.set('toJSON', {
   },
 });
 
-
-exports.User = mongoose.model('User', userSchema);
+exports.User = mongoose.model("User", userSchema);
